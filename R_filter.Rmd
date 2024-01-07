@@ -1,0 +1,212 @@
+---
+title: "gecoR"
+author: "Mamitiana Mahitasoa"
+date: "2024-01-06"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+# Charger les bibliothèques si ce n'est pas déjà fait
+# install.packages("data.table")
+library(data.table)
+
+# Spécifier les chemins des fichiers
+chemin_fichier1 <- "D:/bureau_nov/M1 DLAD/TP/tp_GECO/ftp-files/cai/1.1_cusp_cds_rscu.cai"
+chemin_fichier2 <- "D:/bureau_nov/M1 DLAD/TP/tp_GECO/ftp-files/cai/1_1.1_cusp_cds_rscu.cai"
+chemin_fichier3 <- "D:/bureau_nov/M1 DLAD/TP/tp_GECO/ftp-files/cai/1_1.2_cusp_cds_rscu.cai"
+chemin_fichier4 <- "D:/bureau_nov/M1 DLAD/TP/tp_GECO/ftp-files/cai/1_2.1_cusp_cds_rscu.cai"
+chemin_fichier5 <- "D:/bureau_nov/M1 DLAD/TP/tp_GECO/ftp-files/cai/1_2.2_cusp_cds_rscu.cai"
+
+# Définir la fonction pour lire et renommer les colonnes
+lire_et_renommer_colonnes <- function(chemin_fichier, suffixe) {
+  fread(chemin_fichier, header = FALSE, select = c(2, 4), col.names = c("Sequence", paste("CAI", suffixe, sep = "_")))
+}
+
+# Lire et renommer les colonnes pour chaque fichier
+fichier1 <- lire_et_renommer_colonnes(chemin_fichier1, "1")
+fichier2 <- lire_et_renommer_colonnes(chemin_fichier2, "2")
+fichier3 <- lire_et_renommer_colonnes(chemin_fichier3, "3")
+fichier4 <- lire_et_renommer_colonnes(chemin_fichier4, "4")
+fichier5 <- lire_et_renommer_colonnes(chemin_fichier5, "5")
+
+# Fusionner les fichiers séquentiellement
+resultat <- fichier1
+resultat <- merge(resultat, fichier2, by = "Sequence", all = TRUE)
+resultat <- merge(resultat, fichier3, by = "Sequence", all = TRUE)
+resultat <- merge(resultat, fichier4, by = "Sequence", all = TRUE)
+resultat <- merge(resultat, fichier5, by = "Sequence", all = TRUE)
+
+# Afficher le tableau résultant
+print(resultat)
+
+# Charger la bibliothèque openxlsx
+library(openxlsx)
+
+# Spécifier le chemin du fichier Excel de sortie
+chemin_sortie <- "D:/bureau_nov/M1 DLAD/TP/tp_GECO/ftp-files/cai/cai_resultat.xlsx"
+
+# Enregistrer le tableau dans le fichier Excel
+write.xlsx(resultat, chemin_sortie, rowNames = FALSE)
+
+
+# Charger la bibliothèque ggplot2
+library(ggplot2)
+
+# Créer un objet de données pour ggplot
+data_plot <- reshape2::melt(resultat, id.vars = "Sequence", variable.name = "Colonne_CAI", value.name = "Valeur_CAI")
+
+# Créer le plot avec ggplot2
+ggplot(data_plot, aes(x = Colonne_CAI, y = Valeur_CAI, group = Sequence, color = Sequence)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Différences de CAI par séquence",
+       x = "Numéro de Colonne CAI",
+       y = "Valeur de CAI") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_color_manual(values = rainbow(length(unique(data_plot$Sequence))))
+
+
+```
+
+
+```{r cars}
+# Charger les bibliothèques
+library(readxl)
+library(dplyr)
+
+# Fonction pour lire les résultats BLASTp à partir d'un fichier Excel
+read_blastp_results <- function(file_path) {
+  # Lire le fichier Excel
+  blastp_data <- read_excel(file_path)
+  # Adapter le code en fonction du format réel de vos résultats Excel
+  return(blastp_data)
+}
+
+# Fonction pour identifier les BBH à partir des résultats BLASTp
+identify_bbh <- function(results, species_name) {
+  # Supposons que "qseqid" est la colonne des identifiants de séquence de l'espèce d'intérêt
+  # "sseqid" est la colonne des identifiants de séquence de l'autre espèce
+  # Vous devrez ajuster cela en fonction de vos données réelles
+  bbh_data <- results %>%
+    filter(qseqid %in% results$sseqid & sseqid %in% results$qseqid) %>%
+    mutate(species = species_name)
+  return(bbh_data)
+}
+
+# Fonction pour enregistrer les BBH dans un fichier
+save_bbh_to_file <- function(bbh_data, output_file) {
+  # Utiliser write.table ou write.csv pour enregistrer les données dans un fichier
+  write.csv(bbh_data, output_file, row.names = FALSE)
+}
+
+# Charger les résultats BLASTp pour chaque espèce
+result_species_B <- read_blastp_results("blastp_result_species_B.xlsx")
+# Répéter pour les autres espèces
+
+# Identifier les BBH
+bbh_species_B <- identify_bbh(result_species_B, "species_B")
+# Répéter pour les autres espèces
+
+# Enregistrer les BBH dans un fichier
+save_bbh_to_file(bbh_species_B, "bbh_species_B.csv")
+# Répéter pour les autres espèces
+
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+library(data.table)
+library(dplyr)
+library(parallel)
+
+# Fonction pour calculer les BBH à partir des résultats BLAST
+search_bbh <- function(bh) {
+  # Supposons que "qseqid" est la colonne des identifiants de séquence de l'espèce d'intérêt
+  # "sseqid" est la colonne des identifiants de séquence de l'autre espèce
+  bbh_data <- bh %>%
+    filter(qseqid %in% bh$sseqid & sseqid %in% bh$qseqid)
+  return(bbh_data)
+}
+
+# Fonction pour trouver le génome de base
+find_core_genome <- function(bbh, threshold) {
+  core_genome <- bbh %>%
+    group_by(qseqid) %>%
+    filter(n() >= threshold)
+  return(core_genome)
+}
+
+# Fonction pour calculer la diversité des génomes de base
+parallel_find_random_core_genomes <- function(bh, sizes, batch_size, n_threads) {
+  # Supposons que "qseqid" est la colonne des identifiants de séquence de l'espèce
+  strains <- lapply(sizes, function(i) sample(unique(bh$qseqid), i, replace = FALSE))
+
+  # Fonction pour calculer la diversité d'un ensemble de souches
+  calculate_diversity <- function(strain_set) {
+    sub_bbh <- search_bbh(bh %>% filter(qseqid %in% strain_set))
+    sub_core_genome <- find_core_genome(sub_bbh, length(strain_set))
+    return(data.frame(n_strains = length(strain_set), core_genome_size = nrow(sub_core_genome)))
+  }
+
+  # Utiliser la fonction mclapply pour le traitement parallèle
+  core_genomes_list <- mclapply(strains, calculate_diversity, mc.cores = n_threads)
+  
+  # Convertir la liste de résultats en un dataframe
+  core_genomes_df <- bind_rows(core_genomes_list)
+  return(core_genomes_df)
+}
+
+# Charger les résultats BLASTp pour chaque espèce
+blastp_data <- fread("Data/Outputs/your_blastp_result_file.csv")  # Remplacez par le vrai nom de fichier
+
+# Rechercher les BBH
+bbh_data <- search_bbh(blastp_data)
+
+# Trouver le génome de base
+core_genome <- find_core_genome(bbh_data, 21)
+
+# Calculer la diversité des génomes de base de manière parallèle
+core_genomes_df <- parallel_find_random_core_genomes(blastp_data, sizes = 2:20, batch_size = 20, n_threads = 16)
+
+# Enregistrer les résultats dans un fichier CSV
+write.csv(core_genomes_df, "core_genomes_diversity.csv", row.names = FALSE)
+
+# Tracer le nuage de points
+plot(core_genomes_df$n_strains, core_genomes_df$core_genome_size, xlab = "Nombre de souches", ylab = "Taille du génome de base", main = "Diversité des génomes de base")
+
+```
+
+```{r}
+
+# "C:/Users/HP EliteBook/Downloads/vp_Tableau.pdf"
+# Install and load required packages
+#install.packages(c("ggplot2", "tidyverse"))
+#install.packages("tidyverse")
+#install.packages("readxl")
+library(ggplot2)
+library(tidyverse)
+library(readxl)
+
+# Lire le fichier Excel
+file_path <- "C:/Users/HP EliteBook/Downloads/RSCU.xlsx"
+codon_data <- read_excel(file_path)
+
+# Reshape les données pour les utiliser dans ggplot2
+data_long <- gather(codon_data, key = "Organisme", value = "RSCU", -codons)
+
+# Plot avec ggplot2
+ggplot(data_long, aes(x = codons, y = RSCU, color = Organisme)) +
+  geom_point() +  # Utiliser geom_point pour afficher des points plutôt qu'une ligne
+  labs(title = "Joint Plot des Valeurs de RSCU par Codon",
+       x = "Codons",
+       y = "Valeurs de RSCU") +
+  theme_minimal() 
+  #theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))   # Rotation des étiquettes sur l'axe x
+  #theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))  # Rotation des étiquettes sur l'axe x
+
+
+```
