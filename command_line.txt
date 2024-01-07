@@ -1,0 +1,95 @@
+-------------------------------------------------------------------
+
+Commande line for comparaison genomic Veinollella Parvula DSM 2008
+
+-------------------------------------------------------------------
+BLAST Command Line 
+
+NT (blastn)
+
+1_genomic.fna
+1.2_genomic.fna
+2.1_genomic.fna
+2.2_genomic.fna
+
+./makeblastdb -in 1_genomic.fna -input_type fasta -dbtype nucl -title 1_CDS_db -out 1_CDS_db
+./makeblastdb -in 1.1_genomic.fna -input_type fasta -dbtype nucl -title 1.1_CDS_db -out 1.1_CDS_db
+./makeblastdb -in 1.2_genomic.fna -input_type fasta -dbtype nucl -title 1.2_CDS_db -out 1.2_CDS_db
+./makeblastdb -in 2.1_genomic.fna -input_type fasta -dbtype nucl -title 2.1_CDS_db -out 2.1_CDS_db
+./makeblastdb -in 2.2_genomic.fna -input_type fasta -dbtype nucl -title 2.2_CDS_db -out 2.2_CDS_db
+
+./blastn -db 1_CDS_db -query 1.1_genomic.fna -qcov_hsp_perc 70 -out 1_db_1.1_Query_CDS.txt -outfmt 6
+./blastn -db 1.1_CDS_db -query 1_genomic.fna -qcov_hsp_perc 70 -out 1.1_db_1_Query_CDS.txt -outfmt 6
+./blastn -db 1_CDS_db -query 1.2_genomic.fna -qcov_hsp_perc 70 -out 1_db_1.2_Query_CDS.txt -outfmt 6
+./blastn -db 1.2_CDS_db -query 1_genomic.fna -qcov_hsp_perc 70 -out 1.2_db_1_Query_CDS.txt -outfmt 6
+./blastn -db 1_CDS_db -query 2.1_genomic.fna -qcov_hsp_perc 70 -out 1_db_2.1_Query_CDS.txt -outfmt 6
+./blastn -db 2.1_CDS_db -query 1_genomic.fna -qcov_hsp_perc 70 -out 2.1_db_1_Query_CDS.txt -outfmt 6
+./blastn -db 1_CDS_db -query 2.2_genomic.fna -qcov_hsp_perc 70 -out 1_db_2.2_Query_CDS.txt -outfmt 6
+./blastn -db 2.2_CDS_db -query 1_genomic.fna -qcov_hsp_perc 70 -out 2.2_db_1_Query_CDS.txt -outfmt 6
+
+https://www.metagenomics.wiki/tools/blast/blastn-output-format-6
+
+AA (blastp)
+
+1_protein.faa
+1.1_protein.faa
+1.2_protein.faa
+2.1_protein.faa
+2.2_protein.faa
+
+./makeblastdb -in 1_protein.faa -input_type fasta -dbtype prot -title 1_Protein_db -out 1_Protein_db
+./makeblastdb -in 1.1_protein.faa -input_type fasta -dbtype prot -title 1.1_Protein_db -out 1.1_Protein_db
+./makeblastdb -in 1.2_protein.faa -input_type fasta -dbtype prot -title 1.2_Protein_db -out 1.2_Protein_db
+./makeblastdb -in 2.1_protein.faa -input_type fasta -dbtype prot -title 2.1_Protein_db -out 2.1_Protein_db
+./makeblastdb -in 2.2_protein.faa -input_type fasta -dbtype prot -title 2.2_Protein_db -out 2.2_Protein_db
+-------------------------------------------------------------------------------------------------
+./blastp -db 1.1_Protein_db -query 1_protein.faa -qcov_hsp_perc 30 -out 1.1_db_1_Query_Protein.txt -outfmt 6
+./blastp -db 1.2_Protein_db -query 1_protein.faa -qcov_hsp_perc 30 -out 1.2_db_1_Query_Protein.txt -outfmt 6
+./blastp -db 2.1_Protein_db -query 1_protein.faa -qcov_hsp_perc 30 -out 2.1_db_1_Query_Protein.txt -outfmt 6
+./blastp -db 2.2_Protein_db -query 1_protein.faa -qcov_hsp_perc 30 -out 2.2_db_1_Query_Protein.txt -outfmt 6
+
+./blastp -db 1_Protein_db -query 1.1_protein.faa -qcov_hsp_perc 30 -out 1_db_1.1_Query_Protein.txt -outfmt 6
+./blastp -db 1_Protein_db -query 1.2_protein.faa -qcov_hsp_perc 30 -out 1_db_1.2_Query_Protein.txt -outfmt 6
+./blastp -db 1_Protein_db -query 2.1_protein.faa -qcov_hsp_perc 30 -out 1_db_2.1_Query_Protein.txt -outfmt 6
+./blastp -db 1_Protein_db -query 2.2_protein.faa -qcov_hsp_perc 30 -out 1_db_2.2_Query_Protein.txt -outfmt 6
+
+
+--------------------------------------
+Cusp EMBOSS
+
+cusp GCF_000024945.1_ASM2494v1_cds_from_genomic.fna -rscu -outfile 1_cusp_cds_rscu.cusp
+cusp -sequence GCF_026057735.1_ASM2605773v1_cds_from_genomic.fna -outfile 1.1_cusp_cds.cusp
+cusp -sequence GCF_013393365.1_ASM1339336v1_cds_from_genomic.fna -outfile 1.2_cusp_cds.cusp
+cusp -sequence GCF_003010495.1_ASM301049v1_cds_from_genomic.fna -outfile 2.1_cusp_cds.cusp
+cusp -sequence GCF_900343095.1_PRJEB25867_cds_from_genomic.fna -outfile 2.2_cusp_cds.cusp
+
+--------------------------------------
+CAI EMBOSS
+
+cai -seqall GCF_026057735.1_ASM2605773v1_cds_from_genomic.fna -outfile 1.1_cusp_cds_rscu.cai
+cai -seqall GCF_013393365.1_ASM1339336v1_cds_from_genomic.fna -outfile 1.1_cusp_cds_rscu.cai -cfile 1.2_cusp_cds.cusp
+cai -seqall GCF_013393365.1_ASM1339336v1_cds_from_genomic.fna -outfile 1.2_cusp_cds_rscu.cai -cfile 1.2_cusp_cds.cusp
+cai -seqall GCF_003010495.1_ASM301049v1_cds_from_genomic.fna -outfile 2.1_cusp_cds_rscu.cai -cfile 2.1_cusp_cds.cusp
+cai -seqall GCF_900343095.1_PRJEB25867_cds_from_genomic.fna -outfile 2.2_cusp_cds_rscu.cai -cfile 2.2_cusp_cds.cusp
+
+--------------------------------------
+Orthofinder
+
+docker pull davidemms/orthofinder
+docker run --ulimit nofile=1000000:1000000 -it --rm -v /full/path/to/fastas:/input:Z davidemms/orthofinder orthofinder -f /input
+docker run --ulimit nofile=1000000:1000000 -it --rm -v /mnt/d/bureau_nov/all_fasta:/input:Z davidemms/orthofinder orthofinder -f /input
+
+--------------------------------------
+Mumer
+
+./nucmer -p 1_11outputnucmer 1_GCF_000024945.1_genomic.fna 1.1_GCF_026057735.1_genomic.fna
+./mummerplot -p 1_11plot --png 1_11outputnucmer.delta
+# sudo apt-get install gnuplot
+ 
+./nucmer -p 1_12outputnucmer 1_GCF_000024945.1_genomic.fna 1.2_GCF_013393365.1_genomic.fna
+./mummerplot -p 1_12plot --png 1_12outputnucmer.delta
+gnuplot 1_12plot.gp
+
+./nucmer -p 1_22outputnucmer 1_GCF_000024945.1_genomic.fna 2.2_GCF_900343095.1_genomic.fna
+./mummerplot -p 1_22plot --png 1_22outputnucmer.delta
+gnuplot 1_22plot.gp
